@@ -24,11 +24,9 @@ function TuitionFeeList() {
   const [newTuitionFee, setNewTuitionFee] = useState({
     promotionalPrice: "", // Đổi thành số tiền thực tế
     collectionDate: "", // Ngày thu
-    note: "", // Ghi chú
     activate: "", // Trạng thái (Đã thanh toán, Chưa thanh toán)
     registrationDate: "", // Ngày đăng ký
     courseCode: "", // Mã khóa học
-    studentCode: "", // Mã học viên
   });
   const [editingTuitionFeeId, setEditingTuitionFeeId] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -71,7 +69,7 @@ function TuitionFeeList() {
     e.preventDefault();
 
     // Kiểm tra các trường bắt buộc
-    const requiredFields = ["promotionalPrice", "collectionDate", "activate", "courseCode", "studentCode"]; // Sửa tên trường
+    const requiredFields = ["promotionalPrice", "collectionDate", "activate", "courseCode"]; // Sửa tên trường
     const emptyFields = requiredFields.filter((field) => !newTuitionFee[field]);
 
     if (emptyFields.length > 0) {
@@ -121,11 +119,9 @@ function TuitionFeeList() {
     setNewTuitionFee({
       promotionalPrice: "",
       collectionDate: "",
-      note: "",
       activate: "",
       registrationDate: "",
       courseCode: "",
-      studentCode: "",
     });
     setEditingTuitionFeeId(null);
     setErrorMessage(""); // Reset error message on form reset
@@ -137,11 +133,9 @@ function TuitionFeeList() {
       setNewTuitionFee({
         promotionalPrice: tuitionFeeToEdit.promotionalPrice,
         collectionDate: tuitionFeeToEdit.collectionDate.join("-"), // Format the date as needed
-        note: tuitionFeeToEdit.note,
         activate: tuitionFeeToEdit.activate ? "Đã thanh toán" : "Chưa thanh toán", // Convert boolean to string
         registrationDate: tuitionFeeToEdit.registrationDate.join("-"),
         courseCode: tuitionFeeToEdit.courseCode,
-        studentCode: tuitionFeeToEdit.studentCode,
       });
       setEditingTuitionFeeId(id);
       setShowModal(true);
@@ -197,12 +191,10 @@ function TuitionFeeList() {
                   <tr>
                     <th>STT</th>
                     <th>Mã Khóa Học</th>
-                    <th>Mã Học Viên</th>
                     <th>Số Tiền</th>
                     <th>Ngày Thu</th>
-                    <th>Ghi Chú</th>
                     <th>Trạng Thái</th>
-                    <th>Hành Động</th>
+                    <th>Tùy Chọn</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -211,7 +203,6 @@ function TuitionFeeList() {
                       <tr key={tuitionFee.id}>
                         <td>{indexOfFirstFee + index + 1}</td>
                         <td>{tuitionFee.courseCode}</td> {/* Mã Khóa Học */}
-                        <td>{tuitionFee.studentCode}</td> {/* Mã Học Viên */}
                         <td>
                           {tuitionFee.promotionalPrice != null
                             ? tuitionFee.promotionalPrice.toLocaleString("vi-VN", {
@@ -222,9 +213,7 @@ function TuitionFeeList() {
                         </td>
                         <td>{tuitionFee.collectionDate.join("-")}</td>
                         <td>{tuitionFee.note}</td>
-                        <td>
-                          {tuitionFee.activate ? "Đã thanh toán" : "Chưa thanh toán"}
-                        </td>
+                       
                         <td>
                           <Button
                             variant="info"
@@ -313,15 +302,6 @@ function TuitionFeeList() {
               />
             </Form.Group>
             <Form.Group>
-              <Form.Label>Ghi Chú</Form.Label>
-              <Form.Control
-                type="text"
-                name="note"
-                value={newTuitionFee.note}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
-            <Form.Group>
               <Form.Label>Trạng Thái</Form.Label>
               <Form.Control
                 as="select"
@@ -350,16 +330,6 @@ function TuitionFeeList() {
                 type="text"
                 name="courseCode"
                 value={newTuitionFee.courseCode}
-                onChange={handleInputChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Mã Học Viên</Form.Label>
-              <Form.Control
-                type="text"
-                name="studentCode"
-                value={newTuitionFee.studentCode}
                 onChange={handleInputChange}
                 required
               />

@@ -166,16 +166,6 @@ function StudentRegistration() {
           />
         </Form.Group>
 
-        <Form.Group controlId="studentCode">
-          <Form.Label>Mã Học Viên</Form.Label>
-          <Form.Control
-            type="text"
-            name="studentCode"
-            value={studentData.studentCode}
-            onChange={handleChange}
-            required
-          />
-        </Form.Group>
 
         <Form.Group controlId="imageName">
           <Form.Label> Hình Ảnh</Form.Label>
@@ -231,16 +221,18 @@ function StudentRegistration() {
         <Form.Group controlId="courseId">
           <Form.Label>Mã Khóa Học</Form.Label>
           <Form.Control
-            type="number"
+            type="text"
             name="course_id"
             value={studentData.course_id}
             onChange={handleChange}
             required
           />
         </Form.Group>
-        <Button variant="primary" type="submit">
-          Đăng Ký
-        </Button>
+        <div className="d-flex justify-content-end mt-3">
+          <Button variant="primary" type="submit">
+            Đăng Ký
+          </Button>
+        </div>
       </Form>
     </Container>
   );

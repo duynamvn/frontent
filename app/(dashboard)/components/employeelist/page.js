@@ -34,8 +34,8 @@ function EmployeeList() {
   });
   const [editingEmployeeId, setEditingEmployeeId] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [showDetailModal, setShowDetailModal] = useState(false); // Modal for employee details
-  const [selectedEmployee, setSelectedEmployee] = useState(null); // Employee details
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const employeesPerPage = 5;
 
@@ -66,35 +66,50 @@ function EmployeeList() {
     setErrorMessage("");
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     let newErrors = {
-      fullName: '',
-      dateOfBirth: '',
-      gender: '',
-      nationalID: '',
-      email: '',
-      phoneNumber: '',
-      employeeTypeId: '',
+      fullName: "",
+      dateOfBirth: "",
+      gender: "",
+      nationalID: "",
+      email: "",
+      phoneNumber: "",
+      employeeTypeId: "",
     };
-  
-    if (!newEmployee.fullName) newErrors.fullName = 'Vui lòng điền đầy đủ thông tin!';
-    if (!newEmployee.dateOfBirth) newErrors.dateOfBirth = 'Vui lòng điền đầy đủ thông tin!';
-    if (!newEmployee.gender) newErrors.gender = 'Vui lòng điền đầy đủ thông tin!';
-    if (!newEmployee.nationalID) newErrors.nationalID = 'Vui lòng điền đầy đủ thông tin!';
-    if (!newEmployee.email) newErrors.email = 'Vui lòng điền đầy đủ thông tin!';
-    if (!newEmployee.phoneNumber) newErrors.phoneNumber = 'Vui lòng điền đầy đủ thông tin!';
-    if (!newEmployee.employeeTypeId) newErrors.employeeTypeId = 'Vui lòng điền đầy đủ thông tin!';
-  
-    if (Object.values(newErrors).some(error => error !== '')) {
-      setErrors(newErrors);
+
+    if (!newEmployee.fullName) newErrors.fullName = "Vui lòng điền đầy đủ thông tin!";
+    if (!newEmployee.dateOfBirth) newErrors.dateOfBirth = "Vui lòng điền đầy đủ thông tin!";
+    if (!newEmployee.gender) newErrors.gender = "Vui lòng điền đầy đủ thông tin!";
+    if (!newEmployee.nationalID) newErrors.nationalID = "Vui lòng điền đầy đủ thông tin!";
+    if (!newEmployee.email) newErrors.email = "Vui lòng điền đầy đủ thông tin!";
+    if (!newEmployee.phoneNumber) newErrors.phoneNumber = "Vui lòng điền đầy đủ thông tin!";
+    if (!newEmployee.employeeTypeId) newErrors.employeeTypeId = "Vui lòng điền đầy đủ thông tin!";
+
+    if (Object.values(newErrors).some((error) => error !== "")) {
+      setErrorMessage(newErrors);
       return; // Dừng lại nếu có lỗi
     }
-  
+
     // Nếu không có lỗi, tiến hành thêm hoặc sửa nhân viên
-    // Code để thêm hoặc sửa nhân viên...
+    try {
+      if (editingEmployeeId) {
+        await axios.put(
+          `http://localhost:8080/api/employees/${editingEmployeeId}`,
+          newEmployee
+        );
+        setSuccessMessage("Cập nhật nhân viên thành công");
+      } else {
+        await axios.post("http://localhost:8080/api/employees", newEmployee);
+        setSuccessMessage("Thêm mới nhân viên thành công");
+      }
+      fetchEmployees();
+      resetForm();
+      setShowModal(false);
+    } catch (error) {
+      setErrorMessage("Đã xảy ra lỗi khi lưu nhân viên");
+    }
   };
-  
 
   const resetForm = () => {
     setNewEmployee({
@@ -258,150 +273,154 @@ function EmployeeList() {
       </Row>
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
-  <Modal.Header closeButton>
-    <Modal.Title>{editingEmployeeId ? "Sửa Nhân Viên" : "Thêm Nhân Viên"}</Modal.Title>
-  </Modal.Header>
-  <Modal.Body>
-    <Form onSubmit={handleSubmit}>
-      <Form.Group controlId="fullName">
-        <Form.Label>Họ và Tên</Form.Label>
-        <Form.Control
-          type="text"
-          name="fullName"
-          value={newEmployee.fullName}
-          onChange={handleInputChange}
-          placeholder="Nhập họ và tên"
-          required
-        />
-      </Form.Group>
-      <Form.Group controlId="dateOfBirth">
-        <Form.Label>Ngày Sinh</Form.Label>
-        <Form.Control
-          type="date"
-          name="dateOfBirth"
-          value={newEmployee.dateOfBirth}
-          onChange={handleInputChange}
-          required
-        />
-      </Form.Group>
-      <Form.Group controlId="gender">
-        <Form.Label>Giới Tính</Form.Label>
-        <Form.Control
-          as="select"
-          name="gender"
-          value={newEmployee.gender}
-          onChange={handleInputChange}
-          required
-        >
-          <option value="">Chọn giới tính</option>
-          <option value="Nam">Nam</option>
-          <option value="Nữ">Nữ</option>
-        </Form.Control>
-      </Form.Group>
-      <Form.Group controlId="nationalID">
-        <Form.Label>CCCD</Form.Label>
-        <Form.Control
-          type="text"
-          name="nationalID"
-          value={newEmployee.nationalID}
-          onChange={handleInputChange}
-          placeholder="Nhập số CCCD"
-          required
-        />
-      </Form.Group>
-      <Form.Group controlId="email">
-        <Form.Label>Email</Form.Label>
-        <Form.Control
-          type="email"
-          name="email"
-          value={newEmployee.email}
-          onChange={handleInputChange}
-          placeholder="Nhập email"
-          required
-        />
-      </Form.Group>
-      <Form.Group controlId="phoneNumber">
-        <Form.Label>Số Điện Thoại</Form.Label>
-        <Form.Control
-          type="text"
-          name="phoneNumber"
-          value={newEmployee.phoneNumber}
-          onChange={handleInputChange}
-          placeholder="Nhập số điện thoại"
-          required
-        />
-      </Form.Group>
-      <Form.Group controlId="activate">
-        <Form.Check
-          type="checkbox"
-          label="Kích hoạt"
-          name="activate"
-          checked={newEmployee.activate}
-          onChange={handleInputChange}
-        />
-      </Form.Group>
-      <Form.Group controlId="address">
-        <Form.Label>Địa Chỉ</Form.Label>
-        <Form.Control
-          type="text"
-          name="address"
-          value={newEmployee.address}
-          onChange={handleInputChange}
-          placeholder="Nhập địa chỉ"
-          required
-        />
-      </Form.Group>
-      <Form.Group controlId="employeeTypeName">
-        <Form.Label>Loại Nhân Viên</Form.Label>
-        <Form.Control
-          as="select"
-          name="employeeTypeName"
-          value={newEmployee.employeeTypeName}
-          onChange={handleInputChange}
-          required
-        >
-          <option value="">Chọn loại nhân viên</option>
-          <option value="1">Nhân Viên </option>
-          <option value="2">Giáo Viên</option>
-        </Form.Control>
-      </Form.Group>
-      <Button variant="primary" type="submit">
-        {editingEmployeeId ? "Lưu Thay Đổi" : "Thêm Nhân Viên"}
-      </Button>
-    </Form>
-  </Modal.Body>
-</Modal>
-
-
-      <Modal show={showDetailModal} onHide={() => setShowDetailModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Chi tiết nhân viên</Modal.Title>
+          <Modal.Title>
+            {editingEmployeeId ? "Sửa Nhân Viên" : "Thêm Nhân Viên"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-  {selectedEmployee && (
-    <div>
-      <p>Họ và Tên: {selectedEmployee.fullName}</p>
-      <p>Ngày Sinh: {selectedEmployee.dateOfBirth.join('-')}</p> {/* Hiển thị ngày sinh ở định dạng dễ đọc */}
-      <p>Loại Nhân Viên: {selectedEmployee.employeeType.employeeTypeName}</p> {/* Thay đổi ở đây */}
-      <p>Giới Tính: {selectedEmployee.gender}</p>
-      <p>CCCD: {selectedEmployee.nationalID}</p>
-      <p>Email: {selectedEmployee.email}</p>
-      <p>Số Điện Thoại: {selectedEmployee.phoneNumber}</p>
-      <p>Địa Chỉ: {selectedEmployee.address}</p>
-      <p>Trạng Thái: {selectedEmployee.activate ? "Hoạt động" : "Không hoạt động"}</p>
-    </div>
-  )}
-</Modal.Body>
+          <Form onSubmit={handleSubmit}>
+            <Form.Group controlId="formFullName">
+              <Form.Label>Họ và Tên</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Nhập họ và tên"
+                name="fullName"
+                value={newEmployee.fullName}
+                onChange={handleInputChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formDateOfBirth">
+              <Form.Label>Ngày Sinh</Form.Label>
+              <Form.Control
+                type="date"
+                name="dateOfBirth"
+                value={newEmployee.dateOfBirth}
+                onChange={handleInputChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formGender">
+              <Form.Label>Giới Tính</Form.Label>
+              <Form.Control
+                as="select"
+                name="gender"
+                value={newEmployee.gender}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Chọn giới tính</option>
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+              </Form.Control>
+            </Form.Group>
+            <Form.Group controlId="formNationalID">
+              <Form.Label>CCCD</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Nhập CCCD"
+                name="nationalID"
+                value={newEmployee.nationalID}
+                onChange={handleInputChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formEmail">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                placeholder="Nhập email"
+                name="email"
+                value={newEmployee.email}
+                onChange={handleInputChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formPhoneNumber">
+              <Form.Label>Số Điện Thoại</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Nhập số điện thoại"
+                name="phoneNumber"
+                value={newEmployee.phoneNumber}
+                onChange={handleInputChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formEmployeeType">
+              <Form.Label>Loại Nhân Viên</Form.Label>
+              <Form.Control
+                as="select"
+                name="employeeTypeId"
+                value={newEmployee.employeeTypeId}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Chọn loại nhân viên</option>
+                <option value="1">Giáo Viên</option>
+                <option value="2">Nhân viên</option>
+              </Form.Control>
+            </Form.Group>
 
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDetailModal(false)}>
-            Đóng
-          </Button>
-        </Modal.Footer>
+            
+            
+            <Form.Group controlId="formActivate">
+              <Form.Label>Kích Hoạt</Form.Label>
+              <Form.Check
+                type="checkbox"
+                name="activate"
+                checked={newEmployee.activate}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Form.Group controlId="formAddress">
+              <Form.Label>Địa Chỉ</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                placeholder="Nhập địa chỉ"
+                name="address"
+                value={newEmployee.address}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <div className="d-flex justify-content-end mt-3">
+  <Button variant="primary" type="submit" className="me-2">
+    {editingEmployeeId ? "Cập Nhật" : "Thêm"}
+  </Button>
+</div>
+
+          </Form>
+        </Modal.Body>
+      </Modal>
+
+      <Modal
+        show={showDetailModal}
+        onHide={() => setShowDetailModal(false)}
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Thông Tin Chi Tiết Nhân Viên</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedEmployee && (
+            <>
+              <p><strong>Họ và Tên:</strong> {selectedEmployee.fullName}</p>
+              <p><strong>Ngày Sinh:</strong> {selectedEmployee.dateOfBirth.join('-')}</p>
+              <p><strong>Giới Tính:</strong> {selectedEmployee.gender}</p>
+              <p><strong>CCCD:</strong> {selectedEmployee.nationalID}</p>
+              <p><strong>Email:</strong> {selectedEmployee.email}</p>
+              <p><strong>Số Điện Thoại:</strong> {selectedEmployee.phoneNumber}</p>
+              <p><strong>Loại Nhân Viên:</strong> {selectedEmployee.employeeTypeId}</p>
+              <p><strong>Địa Chỉ:</strong> {selectedEmployee.address}</p>
+              <p><strong>Kích Hoạt:</strong> {selectedEmployee.activate ? "Có" : "Không"}</p>
+            </>
+          )}
+        </Modal.Body>
       </Modal>
     </Container>
   );
 }
-
 
 export default EmployeeList;

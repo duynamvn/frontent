@@ -283,7 +283,7 @@ function TopicList() {
             <Form.Group controlId="formOriginalPrice">
               <Form.Label>Giá Gốc</Form.Label>
               <Form.Control
-                type="number"
+                type="text"
                 name="originalPrice"
                 value={newTopic.originalPrice}
                 onChange={handleInputChange}
@@ -293,16 +293,21 @@ function TopicList() {
             <Form.Group controlId="formPromotionalPrice">
               <Form.Label>Giá Khuyến Mãi</Form.Label>
               <Form.Control
-                type="number"
+                type="text"
                 name="promotionalPrice"
                 value={newTopic.promotionalPrice}
                 onChange={handleInputChange}
                 required
               />
             </Form.Group>
-            <Button variant="primary" type="submit">
-              {editingTopicId ? "Cập Nhật" : "Thêm"}
+            <div className="d-flex justify-content-end mt-3">
+            <Button
+                variant="primary"
+                type="submit"
+            >
+                {editingTopicId ? "Cập Nhật" : "Thêm"}
             </Button>
+            </div>
           </Form>
         </Modal.Body>
       </Modal>

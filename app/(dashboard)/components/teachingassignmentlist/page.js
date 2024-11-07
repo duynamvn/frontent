@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button, Card, Table, Container, Row, Col, Form, Pagination, Alert, Spinner, Modal } from "react-bootstrap";
@@ -7,18 +7,13 @@ function TeachingAssignmentList() {
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [topics, setTopics] = useState([]);
-  const [teachers, setTeachers] = useState([]);
-  const [classes, setClasses] = useState([]);
+  const [courses, setCourses] = useState([]);
   
   const [newAssignment, setNewAssignment] = useState({
-    topicCode: '',
-    teacherId: '',
-    classId: '',
-    schedule: '',
+    courseCode: '',
+   
     activate: false,
   });
-
   const [editingAssignmentId, setEditingAssignmentId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState('');
@@ -27,9 +22,9 @@ function TeachingAssignmentList() {
 
   useEffect(() => {
     fetchAssignments();
-    fetchDropdownData(); // Load dữ liệu cho các dropdown
+    fetchDropdownData();
   }, []);
-
+  
   const fetchAssignments = async () => {
     try {
       const response = await axios.get('http://localhost:8080/api/teaching-assignment');
@@ -42,16 +37,13 @@ function TeachingAssignmentList() {
       setLoading(false);
     }
   };
+  
   const fetchDropdownData = async () => {
     try {
-      const [topicsResponse, teachersResponse, classesResponse] = await Promise.all([
-        axios.get('http://localhost:8080/api/topics'), // Adjust with your endpoint for topics
-        axios.get('http://localhost:8080/api/employee-type'), // Adjust with your endpoint for teachers
-        axios.get('http://localhost:8080/api/class-rooms'), // Adjust with your endpoint for classes
+      const [coursesResponse, teachersResponse, classesResponse] = await Promise.all([
+        axios.get('http://localhost:8080/api/courses'),       
       ]);
-      setTopics(topicsResponse.data);
-      setTeachers(teachersResponse.data);
-      setClasses(classesResponse.data);
+      setCourses(coursesResponse.data);
     } catch (error) {
       console.error('Error fetching dropdown data:', error);
     }
@@ -68,28 +60,35 @@ function TeachingAssignmentList() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      if (!newAssignment.courseCode ) {
+        setMessage("Vui lòng điền đầy đủ thông tin.");
+        return;
+      }
+      const assignmentData = {
+        courseCode: newAssignment.courseCode,
+        activate: newAssignment.activate,
+      };
+      
       if (editingAssignmentId) {
-        await axios.put(`http://localhost:8080/api/teaching-assignment/${editingAssignmentId}`, newAssignment);
+        await axios.put(`http://localhost:8080/api/teaching-assignment/${editingAssignmentId}`, assignmentData);
         setMessage("Cập nhật phân công giảng dạy thành công.");
       } else {
-        await axios.post('http://localhost:8080/api/teaching-assignment', newAssignment);
+        await axios.post('http://localhost:8080/api/teaching-assignment', assignmentData);
         setMessage("Thêm phân công giảng dạy thành công.");
       }
       fetchAssignments();
       resetForm();
       setShowModal(false);
     } catch (error) {
-      console.error('Error saving assignment:', error.response ? error.response.data : error.message);
+      console.error('Error saving assignment:', error);
       setMessage("Đã xảy ra lỗi khi lưu thông tin phân công.");
     }
   };
 
   const resetForm = () => {
     setNewAssignment({
-      topicCode: '',
-      teacherId: '',
-      classId: '',
-      schedule: '',
+      courseCode: '',
+      
       activate: false,
     });
     setEditingAssignmentId(null);
@@ -99,10 +98,8 @@ function TeachingAssignmentList() {
     const assignmentToEdit = assignments.find((assignment) => assignment.id === id);
     if (assignmentToEdit) {
       setNewAssignment({
-        topicCode: assignmentToEdit.course.topic.topicCode,
-        teacherId: assignmentToEdit.employee.id,
-        classId: assignmentToEdit.course.id,
-        schedule: assignmentToEdit.course.session.sessionName,
+        courseCode: assignmentToEdit.course?.courseCode || '',
+       
         activate: assignmentToEdit.activate,
       });
       setEditingAssignmentId(id);
@@ -131,6 +128,7 @@ function TeachingAssignmentList() {
 
   if (loading) return <Spinner animation="border" variant="primary" />;
   if (error) return <Alert variant="danger">{error}</Alert>;
+
   return (
     <Container fluid>
       <Row>
@@ -146,35 +144,30 @@ function TeachingAssignmentList() {
               </Button>
             </Card.Header>
 
-            <Card.Body className="table-full-width table-responsive px-0">
+            <Card.Body className="table-full-width table-responsive px-10">
               <Table className="table-hover table-striped">
                 <thead>
                   <tr>
                     <th>STT</th>
-                    <th>Mã Chuyên Đề</th>
-                    <th>Tên Giảng Viên</th>
-                    <th>Mã Lớp</th>
-                    <th>Lịch Dạy</th>
-                    <th>Kích Hoạt</th>
+                    <th>Mã Khóa Học</th>
+                    
                     <th>Tùy Chọn</th>
                   </tr>
                 </thead>
                 <tbody>
                   {currentAssignments.length > 0 ? (
-                    currentAssignments.map((assignment, index) =>(
+                    currentAssignments.map((assignment, index) => (
                       <tr key={assignment.id}>
-                        <td>{(currentPage - 1) * assignmentsPerPage + index + 1}</td> {/* Số thứ tự */}
-                        <td>{assignment.course && assignment.course.topic ? assignment.course.topic.topicCode : 'N/A'}</td>
-                        <td>{assignment.employee ? assignment.employee.fullName : 'N/A'}</td>
-                        <td>{assignment.course ? assignment.course.id : 'N/A'}</td>
-                        <td>{assignment.course && assignment.course.session ? assignment.course.session.sessionName : 'N/A'}</td>
+                        <td>{(currentPage - 1) * assignmentsPerPage + index + 1}</td>
+                        <td>{assignment.course?.courseCode || 'N/A'}</td>
+                        
                         <td>{assignment.activate ? "Kích Hoạt" : "Không Kích Hoạt"}</td>
                         <td>
                           <Button 
-                          variant="info" 
-                          className="btn-action"
-                          style={{ marginRight: "10px" }}
-                           onClick={() => handleEdit(assignment.id)}>
+                            variant="info" 
+                            className="btn-action"
+                            style={{ marginRight: "10px" }}
+                            onClick={() => handleEdit(assignment.id)}>
                             Sửa
                           </Button>
                           <Button variant="danger" onClick={() => handleDelete(assignment.id)}>
@@ -208,46 +201,32 @@ function TeachingAssignmentList() {
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit}>
-            <Form.Group controlId="formtopicCode">
-              <Form.Label>Mã Chuyên Đề</Form.Label>
-              <Form.Select name="topicCode" value={newAssignment.topicCode} onChange={handleInputChange} required>
-                <option value="">Chọn Chuyên Đề</option>
-                {topics.map((topic) => (
-                  <option key={topic.id} value={topic.topicCode}>{topic.topicCode}</option>
+            <Form.Group controlId="formcourseCode">
+              <Form.Label>Mã Khóa Học</Form.Label>
+              <Form.Select name="courseCode" value={newAssignment.courseCode} onChange={handleInputChange} required>
+                <option value="">Chọn Khóa Học</option>
+                {courses.map((course) => (
+                  <option key={course.id} value={course.courseCode}>{course.courseCode}</option>  
                 ))}
               </Form.Select>
             </Form.Group>
-            <Form.Group controlId="formemployee-type">
-              <Form.Label>Tên Giảng Viên</Form.Label>
-              <Form.Select name="teacherId" value={newAssignment.teacherId} onChange={handleInputChange} required>
-                <option value="">Chọn Giảng Viên</option>
-                {teachers.map((teacher) => (
-                  <option key={teacher.id} value={teacher.id}>{teacher.fullName}</option>
-                ))}
-              </Form.Select>
+           
+            <Form.Group controlId="formactivate">
+              <Form.Check 
+                type="checkbox"
+                label="Kích Hoạt"
+                name="activate"
+                checked={newAssignment.activate}
+                onChange={handleInputChange}
+              />
             </Form.Group>
-            <Form.Group controlId="formClassId">
-              <Form.Label>Mã Lớp</Form.Label>
-              <Form.Select name="classId" value={newAssignment.classId} onChange={handleInputChange} required>
-                <option value="">Chọn Lớp</option>
-                {classes.map((cls) => (
-                  <option key={cls.id} value={cls.id}>{cls.id}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group controlId="formSchedule">
-              <Form.Label>Lịch Dạy</Form.Label>
-              <Form.Control type="text" name="schedule" value={newAssignment.schedule} onChange={handleInputChange} />
-            </Form.Group>
-            <Form.Group controlId="formActivate">
-              <Form.Check type="checkbox" name="activate" label="Kích Hoạt" checked={newAssignment.activate} onChange={handleInputChange} />
-            </Form.Group>
-            <Button variant="primary" type="submit">{editingAssignmentId ? "Cập Nhật" : "Thêm"}</Button>
+            {message && <Alert variant="warning">{message}</Alert>}
+            <Button variant="primary" type="submit">
+              {editingAssignmentId ? "Cập Nhật" : "Thêm"}
+            </Button>
           </Form>
         </Modal.Body>
       </Modal>
-
-      {message && <Alert variant="success">{message}</Alert>}
     </Container>
   );
 }

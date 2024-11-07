@@ -68,19 +68,35 @@ function StudentList() {
   };
 
   const handleSave = async () => {
-    try {
-      await axios.put(
-        `http://localhost:8080/api/student/${selectedStudent.id}`,
-        selectedStudent
-      );
-      fetchStudents();
-      setShowModal(false);
-      alert("Cập nhật học viên thành công.");
-    } catch (error) {
-      console.error("Error updating student:", error);
-      alert("Đã xảy ra lỗi khi cập nhật học viên.");
-    }
-  };
+  // Kiểm tra nếu có bất kỳ trường nào chưa điền
+  if (
+    !selectedStudent.fullName ||
+    !selectedStudent.dateOfBirth ||
+    !selectedStudent.nationalID ||
+    !selectedStudent.email ||
+    !selectedStudent.gender ||
+    !selectedStudent.address ||
+    !selectedStudent.phoneNumber ||
+    !selectedStudent.studentCode
+  ) {
+    alert("Vui lòng điền đầy đủ thông tin trước khi lưu.");
+    return; // Dừng việc lưu nếu thiếu thông tin
+  }
+
+  try {
+    await axios.put(
+      `http://localhost:8080/api/student/${selectedStudent.id}`,
+      selectedStudent
+    );
+    fetchStudents();
+    setShowModal(false);
+    alert("Cập nhật học viên thành công.");
+  } catch (error) {
+    console.error("Error updating student:", error);
+    alert("Đã xảy ra lỗi khi cập nhật học viên.");
+  }
+};
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -228,6 +244,15 @@ function StudentList() {
                   />
                 </Form.Group>
                 <Form.Group>
+                  <Form.Label>CCCD</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="nationalID"
+                    value={selectedStudent.nationalID || ""}
+                    onChange={handleInputChange}
+                  />
+                </Form.Group>
+                <Form.Group>
                   <Form.Label>Email</Form.Label>
                   <Form.Control
                     type="email"
@@ -267,15 +292,7 @@ function StudentList() {
                     onChange={handleInputChange}
                   />
                 </Form.Group>
-                <Form.Group>
-                  <Form.Label>Mã Học Viên</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="studentCode"
-                    value={selectedStudent.studentCode || ""}
-                    onChange={handleInputChange}
-                  />
-                </Form.Group>
+                
 
                 <Form.Group>
                   <Form.Label>Trạng Thái</Form.Label>
@@ -303,8 +320,8 @@ function StudentList() {
               </Form>
             ) : (
               <div>
-                <p>Họ và Tên: {selectedStudent.fullName}</p>
-                <p>Ngày Sinh: {selectedStudent.dateOfBirth.join('-')}</p>
+                <p><strong>Họ và Tên:</strong> {selectedStudent.fullName}</p>
+                <p><strong>Ngày Sinh:</strong> {selectedStudent.dateOfBirth.join('-')}</p>
                 <p>
                   <strong>Email:</strong> {selectedStudent.email}
                 </p>
@@ -331,14 +348,15 @@ function StudentList() {
             )}
           </Modal.Body>
           <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Hủy
+            </Button>
             {editMode ? (
               <Button variant="primary" onClick={handleSave}>
                 Lưu
               </Button>
             ) : null}
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
-              Hủy
-            </Button>
+            
           </Modal.Footer>
         </Modal>
       )}
